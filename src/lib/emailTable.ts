@@ -61,7 +61,7 @@ function escapeHtml(s: string): string {
 }
 
 const TABLE_STYLE =
-  "border-collapse:collapse;font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#111827;border:1px solid #d1d5db;";
+  "border-collapse:collapse;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#111827;border:1px solid #d1d5db;";
 const TH_STYLE =
   "text-align:left;padding:8px 12px;border:1px solid #d1d5db;background:#f3f4f6;font-weight:600;color:#111827;white-space:nowrap;";
 const TD_STYLE =
