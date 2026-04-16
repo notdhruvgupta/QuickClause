@@ -5,11 +5,13 @@ import Tabs from "@/components/Tabs";
 import SqlGenerator from "@/components/SqlGenerator";
 import Templates from "@/components/Templates";
 import Snippets from "@/components/Snippets";
+import EmailTable from "@/components/EmailTable";
 
 const TABS = [
   { id: "sql", label: "SQL Clause" },
   { id: "templates", label: "Query Templates" },
   { id: "snippets", label: "Email Snippets" },
+  { id: "table", label: "Email Table" },
 ];
 
 export default function Home() {
@@ -46,9 +48,18 @@ export default function Home() {
       </header>
 
       <main className="mx-auto max-w-6xl px-4 py-6">
-        {active === "sql" && <SqlGenerator onClauseGenerated={setClause} />}
-        {active === "templates" && <Templates currentClause={clause} />}
-        {active === "snippets" && <Snippets />}
+        <div className={active === "sql" ? "" : "hidden"}>
+          <SqlGenerator onClauseGenerated={setClause} />
+        </div>
+        <div className={active === "templates" ? "" : "hidden"}>
+          <Templates currentClause={clause} />
+        </div>
+        <div className={active === "snippets" ? "" : "hidden"}>
+          <Snippets />
+        </div>
+        <div className={active === "table" ? "" : "hidden"}>
+          <EmailTable />
+        </div>
       </main>
 
       <footer className="mx-auto max-w-6xl px-4 py-6 text-xs text-neutral-500">

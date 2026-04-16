@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { columnValues, parseInput, toSqlClause } from "@/lib/parser";
 import CopyButton from "./CopyButton";
 
@@ -25,6 +25,10 @@ export default function SqlGenerator({ onClauseGenerated }: Props) {
   );
 
   const clause = useMemo(() => toSqlClause(values), [values]);
+
+  useEffect(() => {
+    onClauseGenerated(values.length === 0 ? "" : clause);
+  }, [clause, values.length, onClauseGenerated]);
 
   const formatLabel: Record<typeof table.format, string> = {
     empty: "Paste data to begin",
@@ -69,11 +73,7 @@ export default function SqlGenerator({ onClauseGenerated }: Props) {
             <span className="text-xs text-neutral-500">
               {values.length} value{values.length === 1 ? "" : "s"}
             </span>
-            <CopyButton
-              value={clause}
-              disabled={values.length === 0}
-              onCopy={() => onClauseGenerated(clause)}
-            />
+            <CopyButton value={clause} disabled={values.length === 0} />
           </div>
         </div>
         <pre className="w-full min-h-32 max-h-80 overflow-auto rounded-lg border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 p-3 text-sm font-mono text-neutral-900 dark:text-neutral-100 whitespace-pre-wrap break-all">

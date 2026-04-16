@@ -4,6 +4,7 @@ import { useState } from "react";
 
 type Props = {
   value: string;
+  html?: string;
   label?: string;
   onCopy?: () => void;
   disabled?: boolean;
@@ -12,6 +13,7 @@ type Props = {
 
 export default function CopyButton({
   value,
+  html,
   label = "Copy",
   onCopy,
   disabled,
@@ -22,7 +24,19 @@ export default function CopyButton({
   async function copy() {
     if (disabled || !value) return;
     try {
-      if (navigator.clipboard?.writeText) {
+      const canRich =
+        !!html &&
+        typeof ClipboardItem !== "undefined" &&
+        typeof navigator.clipboard?.write === "function";
+
+      if (canRich) {
+        await navigator.clipboard.write([
+          new ClipboardItem({
+            "text/html": new Blob([html!], { type: "text/html" }),
+            "text/plain": new Blob([value], { type: "text/plain" }),
+          }),
+        ]);
+      } else if (navigator.clipboard?.writeText) {
         await navigator.clipboard.writeText(value);
       } else {
         const ta = document.createElement("textarea");

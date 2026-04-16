@@ -10,12 +10,14 @@ export function parseInput(input: string): ParsedTable {
   }
 
   const rawLines = input.replace(/\r\n?/g, "\n").split("\n");
+  // Strip trailing tabs/spaces per line so "1\t" collapses to "1".
+  const lines = rawLines.map((l) => l.replace(/[\t ]+$/g, ""));
 
-  // Detect stacked format: groups of 2 non-empty lines separated by blank lines.
+  // Stacked A: groups of 2 non-empty lines separated by blank lines.
   const groups: string[][] = [];
   let current: string[] = [];
-  for (const line of rawLines) {
-    if (line.trim() === "") {
+  for (const line of lines) {
+    if (line === "") {
       if (current.length) {
         groups.push(current);
         current = [];
@@ -26,10 +28,7 @@ export function parseInput(input: string): ParsedTable {
   }
   if (current.length) groups.push(current);
 
-  const isStacked =
-    groups.length >= 2 && groups.every((g) => g.length === 2);
-
-  if (isStacked) {
+  if (groups.length >= 2 && groups.every((g) => g.length === 2)) {
     return {
       headers: ["ID", "Value"],
       rows: groups.map((g) => [g[0].trim(), g[1].trim()]),
@@ -37,11 +36,38 @@ export function parseInput(input: string): ParsedTable {
     };
   }
 
-  const nonEmpty = rawLines.filter((l) => l.trim() !== "");
+  const nonEmpty = lines.filter((l) => l !== "");
   if (nonEmpty.length === 0) {
     return { headers: [], rows: [], format: "empty" };
   }
 
+  // Stacked B: alternating ID / Value rows with no blank separators.
+  // Only when no line looks multi-column and odd-positioned lines are numeric.
+  const anyLineIsMultiCol = nonEmpty.some(
+    (l) => l.includes("\t") || /\S\s{2,}\S/.test(l)
+  );
+  if (
+    !anyLineIsMultiCol &&
+    nonEmpty.length >= 4 &&
+    nonEmpty.length % 2 === 0
+  ) {
+    const ids: string[] = [];
+    const vals: string[] = [];
+    for (let i = 0; i < nonEmpty.length; i += 2) {
+      ids.push(nonEmpty[i].trim());
+      vals.push(nonEmpty[i + 1].trim());
+    }
+    const allIdsNumeric = ids.every((s) => /^\d+$/.test(s));
+    if (allIdsNumeric) {
+      return {
+        headers: ["ID", "Value"],
+        rows: ids.map((id, i) => [id, vals[i]]),
+        format: "stacked",
+      };
+    }
+  }
+
+  // Tabular
   const hasTabs = nonEmpty.some((l) => l.includes("\t"));
   const splitLine = (line: string): string[] => {
     if (hasTabs) return line.split("\t").map((s) => s.trim());
