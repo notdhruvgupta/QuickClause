@@ -26,6 +26,12 @@ export default function SqlGenerator({ onClauseGenerated }: Props) {
 
   const clause = useMemo(() => toSqlClause(values), [values]);
 
+  const [showCsv, setShowCsv] = useState(false);
+  const csvOutput = useMemo(
+    () => values.map((v) => v.replace(/[\s\t]+/g, "")).join(","),
+    [values]
+  );
+
   useEffect(() => {
     onClauseGenerated(values.length === 0 ? "" : clause);
   }, [clause, values.length, onClauseGenerated]);
@@ -105,6 +111,31 @@ export default function SqlGenerator({ onClauseGenerated }: Props) {
                 );
               })}
             </div>
+          </div>
+        )}
+
+        <div className="pt-1">
+          <button
+            type="button"
+            disabled={values.length === 0}
+            onClick={() => setShowCsv((v) => !v)}
+            className="rounded-md px-3 py-1.5 text-xs font-medium border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-700 dark:text-neutral-300 hover:border-neutral-400 disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            {showCsv ? "Hide CSV" : "Convert to CSV"}
+          </button>
+        </div>
+
+        {showCsv && values.length > 0 && (
+          <div className="space-y-2 pt-1 border-t border-neutral-200 dark:border-neutral-800">
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                CSV values
+              </label>
+              <CopyButton value={csvOutput} label="Copy" disabled={false} />
+            </div>
+            <pre className="w-full min-h-12 max-h-48 overflow-auto rounded-lg border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 p-3 text-sm font-mono text-neutral-900 dark:text-neutral-100 whitespace-pre-wrap break-all">
+              {csvOutput}
+            </pre>
           </div>
         )}
       </section>
